@@ -1,0 +1,48 @@
+<?php
+/*
+ * Plugin Name: cf_entries
+ * Description: Direct access for Caldera Forms tables in SQL database via API
+ * Version: 0.1
+ * Author: Andrii Pokora
+ * email: ap@custom.apps.pro
+ * Author URI: https://github.com/andrewpokora/calderaforms_via_sql/
+ */
+
+
+// get entry ID by enquiry ID number 
+
+function get_cf_entry_id( WP_REST_Request $request ) {
+	if( current_user_can('administrator') ){
+		$re = $request['id'];
+		global $wpdb;
+	    $row = $wpdb->get_results("SELECT `entry_id` FROM wp_cf_form_entry_values WHERE `value` = '$re' "); 
+	    return $row;
+	}
+}
+
+add_action( 'rest_api_init', function () {
+    register_rest_route( 'cf_entries', '/entry/s(?P<id>.+)', array(
+    'methods' => 'GET',
+    'callback' => 'get_cf_entry_id'
+    ) );
+} );
+
+
+//get values for given entry ID
+function get_cf_entries_values( WP_REST_Request $request ) {
+	if( current_user_can('administrator') ){
+		$re = $request['id'];
+		global $wpdb;
+	    $row = $wpdb->get_results("SELECT * FROM wp_cf_form_entry_values WHERE `entry_id` = '$re' "); 
+	    return $row;
+	}
+}
+
+add_action( 'rest_api_init', function () {
+    register_rest_route( 'cf_entries', '/values/s(?P<id>.+)', array(
+    'methods' => 'GET',
+    'callback' => 'get_cf_entries_values'
+    ) );
+} );
+
+?>
